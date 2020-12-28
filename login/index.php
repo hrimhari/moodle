@@ -186,7 +186,8 @@ if ($frm and isset($frm->username)) {                             // Login WITH 
             $PAGE->set_heading($site->fullname);
             echo $OUTPUT->header();
             echo $OUTPUT->heading(get_string("mustconfirm"));
-            $userauth = get_auth_plugin($USER->auth);
+            $userauth = get_auth_plugin($user->auth);
+            $resendmsg = $OUTPUT->box(get_string("emailconfirmsent", "", s($user->email)), "generalbox boxaligncenter");
             if ($userauth->can_resend_confirmation()) {
                 if ($resendconfirmemail) {
                     if (!send_confirmation_email($user)) {
@@ -195,7 +196,7 @@ if ($frm and isset($frm->username)) {                             // Login WITH 
                         echo $OUTPUT->notification(get_string('emailconfirmsentsuccess'), \core\output\notification::NOTIFY_SUCCESS);
                     }
                 }
-                echo $OUTPUT->box(get_string("emailconfirmsent", "", s($user->email)), "generalbox boxaligncenter");
+                echo $resendmsg;
                 $resendconfirmurl = new moodle_url('/login/index.php',
                     [
                         'username' => $frm->username,
@@ -205,6 +206,8 @@ if ($frm and isset($frm->username)) {                             // Login WITH 
                     ]
                 );
                 echo $OUTPUT->single_button($resendconfirmurl, get_string('emailconfirmationresend'));
+            } else {
+                echo $resendmsg;
             }
             echo $OUTPUT->footer();
             die;
