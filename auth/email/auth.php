@@ -156,6 +156,32 @@ class auth_plugin_email extends auth_plugin_base {
     }
 
     /**
+     * Returns true if plugin allows resending confirmation of new users.
+     *
+     * @return bool
+     */
+    function can_resend_confirmation() {
+        return true;
+    }
+
+    /**
+     * Resend confirmation email for the new user.
+     *
+     * @param string $username
+     */
+    function user_resend_confirmation($username) {
+        $returnmsg = get_string('emailconfirmsentfailure');
+        $messagetype = \core\output\notification::NOTIFY_ERROR;
+        if ($user->secret == $confirmsecret) {   // They have provided the secret key to get in
+            if (!send_confirmation_email($user)) {
+                $returnmsg = get_string('emailconfirmsentsuccess');
+                $messagetype = \core\output\notification::NOTIFY_SUCCESS;
+            }
+        }
+        redirect($returnurl, $returnmsg, null, $messagetype);
+    }
+
+    /**
      * Returns true if plugin allows confirming of new users.
      *
      * @return bool

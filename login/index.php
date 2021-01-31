@@ -186,22 +186,29 @@ if ($frm and isset($frm->username)) {                             // Login WITH 
             $PAGE->set_heading($site->fullname);
             echo $OUTPUT->header();
             echo $OUTPUT->heading(get_string("mustconfirm"));
-            if ($resendconfirmemail) {
-                if (!send_confirmation_email($user)) {
-                    echo $OUTPUT->notification(get_string('emailconfirmsentfailure'), \core\output\notification::NOTIFY_ERROR);
-                } else {
-                    echo $OUTPUT->notification(get_string('emailconfirmsentsuccess'), \core\output\notification::NOTIFY_SUCCESS);
+            $userauth = get_auth_plugin($user->auth);
+            $resendmsg = $OUTPUT->box(get_string("emailconfirmsent", "", s($user->email)), "generalbox boxaligncenter");
+            if ($userauth->can_resend_confirmation()) {
+                if ($resendconfirmemail) {
+                    if (!send_confirmation_email($user)) {
+                        echo $OUTPUT->notification(get_string('emailconfirmsentfailure'), \core\output\notification::NOTIFY_ERROR);
+                    } else {
+                        echo $OUTPUT->notification(get_string('emailconfirmsentsuccess'), \core\output\notification::NOTIFY_SUCCESS);
+                    }
                 }
+                echo $resendmsg;
+                $resendconfirmurl = new moodle_url('/login/index.php',
+                    [
+                        'username' => $frm->username,
+                        'password' => $frm->password,
+                        'resendconfirmemail' => true,
+                        'logintoken' => \core\session\manager::get_login_token()
+                    ]
+                );
+                echo $OUTPUT->single_button($resendconfirmurl, get_string('emailconfirmationresend'));
+            } else {
+                echo $resendmsg;
             }
-            echo $OUTPUT->box(get_string("emailconfirmsent", "", s($user->email)), "generalbox boxaligncenter");
-            $resendconfirmurl = new moodle_url('/login/index.php',
-                [
-                    'username' => $frm->username,
-                    'password' => $frm->password,
-                    'resendconfirmemail' => true
-                ]
-            );
-            echo $OUTPUT->single_button($resendconfirmurl, get_string('emailconfirmationresend'));
             echo $OUTPUT->footer();
             die;
         }

@@ -339,6 +339,26 @@ class auth_plugin_base {
     }
 
     /**
+     * Returns true if plugin allows resending confirmation of new users.
+     *
+     * @return bool
+     */
+    function can_resend_confirmation() {
+        //override if needed
+        return false;
+    }
+
+    /**
+     * Resend user confirmation email.
+     *
+     * @param string $username
+     */
+    function user_resend_confirmation($username) {
+        //override when can confirm
+        print_error('mustbeoveride', 'debug', '', 'user_resend_confirmation()' );
+    }
+
+    /**
      * Checks if user exists in external db
      *
      * @param string $username (with system magic quotes)
