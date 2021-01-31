@@ -71,14 +71,10 @@
             print_error('alreadyconfirmed');
         }
 
-        $returnmsg = get_string('emailconfirmsentsuccess');
-        $messagetype = \core\output\notification::NOTIFY_SUCCESS;
-        if (!send_confirmation_email($user)) {
-            $returnmsg = get_string('emailconfirmsentfailure');
-            $messagetype = \core\output\notification::NOTIFY_ERROR;
-        }
+        $auth = get_auth_plugin($user->auth);
 
-        redirect($returnurl, $returnmsg, null, $messagetype);
+        $auth->user_resend_confirmation($user->username);
+
     } else if ($delete and confirm_sesskey()) {              // Delete a selected user, after confirmation
         require_capability('moodle/user:delete', $sitecontext);
 
@@ -383,12 +379,16 @@
                     $lastcolumn = "<span class=\"dimmed_text\">".get_string('confirm')."</span>";
                 }
 
-                $lastcolumn .= ' | ' . html_writer::link(new moodle_url($returnurl,
-                    [
-                        'resendemail' => $user->id,
-                        'sesskey' => sesskey()
-                    ]
-                ), $strresendemail);
+                $auth = get_auth_plugin($user->auth);
+
+                if ($auth->can_resend_confirmation()) {
+                    $lastcolumn .= ' | ' . html_writer::link(new moodle_url($returnurl,
+                        [
+                            'resendemail' => $user->id,
+                            'sesskey' => sesskey()
+                        ]
+                    ), $strresendemail);
+                }
             }
 
             if ($user->lastaccess) {
